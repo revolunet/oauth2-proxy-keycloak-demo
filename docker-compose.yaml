@@ -1,0 +1,48 @@
+version: "3"
+
+volumes:
+  postgres_data:
+    driver: local
+
+services:
+  postgres:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: pgadmin
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:19.0.0
+    environment:
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/keycloak"
+      KC_METRICS_ENABLED: "true"
+      KC_DB_USERNAME: pgadmin
+      KC_DB_PASSWORD: pgpassword
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_LOG_LEVEL: INFO
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+    volumes:
+      - ./keycloak/config:/opt/keycloak/data/import
+      - ./keycloak/providers:/opt/keycloak/providers
+    command: "start --import-realm --db=postgres --http-enabled=true --http-port=8080 --hostname-strict=false --hostname-strict-https=false --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true "
+  proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.4.0
+    environment:
+      OAUTH2_PROXY_PROVIDER: keycloak-oidc
+      OAUTH2_PROXY_CLIENT_ID: oauth2-proxy
+      OAUTH2_PROXY_CLIENT_SECRET: some-client-secret
+      OAUTH2_PROXY_REDIRECT_URL: "http://front/oauth2/callback"
+      OAUTH2_PROXY_OIDC_ISSUER: "http://127.0.0.1:8080/auth/realms/app-realm"
+      # OAUTH2_PROXY_ALLOWED_ROLE: <realm role name> // Optional, required realm role
+      # OAUTH2_PROXY_ALLOWED_ROLE: <client id>:<client role name> // Optional, required client role
+
+
+  front:
+    image: pengbai/docker-supermario
+    
