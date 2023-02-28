@@ -1,10 +1,16 @@
 # oauth2-proxy + keycloak demo
 
-This docker-compose setup demonstrates how to protect some web service behind an [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) + [keycloak](https://www.keycloak.org/) authentification
+This docker-compose setup demonstrates how to protect some web service behind an [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) + [keycloak](https://www.keycloak.org/) authentification.
 
-## KeyCloak setup
+[![](./diagram.jpg)](https://developer.okta.com/blog/2022/07/14/add-auth-to-any-app-with-oauth2-proxy)
 
-- Create new client in your Keycloak realm with Access Type 'confidental', Client protocol 'openid-connect' and Valid Redirect URIs 'https://internal.yourcompany.com/oauth2/callback'
-- Take note of the Secret in the credential tab of the client
-- Create a mapper with Mapper Type 'Group Membership' and Token Claim Name 'groups'.
-- Create a mapper with Mapper Type 'Audience' and Included Client Audience and Included Custom Audience set to your client name.
+## Setup
+
+- Add `127.0.0.1   keycloak` to your `/etc/hosts`. this is necessary for the keycloak redirection
+- Run `docker-compose up`
+- Login to keycloak at `http://keycloak:8080` as `admin/admin` and create a new user in the `app-realm` realm.
+- Try to login with your new user via http://127.0.0.1:3000
+
+## Tips
+
+- To add a link to signout in your app, point to `/oauth2/sign_out`
