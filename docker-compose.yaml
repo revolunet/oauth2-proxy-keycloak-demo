@@ -47,13 +47,14 @@ services:
     environment:
       OAUTH2_PROXY_PROVIDER: keycloak-oidc
       OAUTH2_PROXY_CLIENT_ID: oauth2-proxy
-      OAUTH2_PROXY_CLIENT_SECRET: HtSvNZObtvMmmrzsm6GnfAFDjnjX2ZEw
+      OAUTH2_PROXY_CLIENT_SECRET: "9htf4MohQEbbo64lcijfVvzw9Klgjfg5"
       OAUTH2_PROXY_REDIRECT_URL: "http://127.0.0.1:3000/oauth2/callback"
       OAUTH2_PROXY_OIDC_ISSUER_URL: "http://keycloak:8080/realms/app-realm"
 #      OAUTH2_PROXY_SKIP_OIDC_DISCOVERY: true # because 127.0.0.1:8080 is not valid inside docker-compose network
 #      OAUTH2_PROXY_OIDC_JWKS_URL: "http://127.0.0.1:8080/realms/app-realm/.well-known/openid-configuration"
       OAUTH2_PROXY_COOKIE_SECRET: 580b11331e148cacf8428190758c4fe2
       OAUTH2_PROXY_COOKIE_SECURE: false # for local env only
+      OAUTH2_PROXY_SHOW_DEBUG_ON_ERROR: true # for local env only
       OAUTH2_PROXY_EMAIL_DOMAINS: "*" # allow any email
       OAUTH2_PROXY_UPSTREAMS: "http://front:8080/"
       OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
