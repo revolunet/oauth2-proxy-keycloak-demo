@@ -6,6 +6,7 @@ volumes:
 
 services:
   postgres:
+    # this DB will host the keycloak config
     image: postgres:14
     restart: always
     volumes:
@@ -34,7 +35,7 @@ services:
       - ./keycloak/providers:/opt/keycloak/providers
     command: "start --import-realm --db=postgres --http-enabled=true --http-port=8080 --hostname-strict=false --hostname-strict-https=false --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true "
     healthcheck:
-      # wait for the JWK url to be available
+      # wait for the openid config url to be available
       test: curl --fail http://127.0.0.1:8080/realms/app-realm/.well-known/openid-configuration || exit 1
       interval: 10s
       retries: 50
@@ -50,8 +51,6 @@ services:
       OAUTH2_PROXY_CLIENT_SECRET: "9htf4MohQEbbo64lcijfVvzw9Klgjfg5"
       OAUTH2_PROXY_REDIRECT_URL: "http://127.0.0.1:3000/oauth2/callback"
       OAUTH2_PROXY_OIDC_ISSUER_URL: "http://keycloak:8080/realms/app-realm"
-#      OAUTH2_PROXY_SKIP_OIDC_DISCOVERY: true # because 127.0.0.1:8080 is not valid inside docker-compose network
-#      OAUTH2_PROXY_OIDC_JWKS_URL: "http://127.0.0.1:8080/realms/app-realm/.well-known/openid-configuration"
       OAUTH2_PROXY_COOKIE_SECRET: 580b11331e148cacf8428190758c4fe2
       OAUTH2_PROXY_COOKIE_SECURE: false # for local env only
       OAUTH2_PROXY_SHOW_DEBUG_ON_ERROR: true # for local env only
@@ -61,9 +60,6 @@ services:
       OAUTH2_PROXY_BANNER: "Login to keycloak to access the app"
       OAUTH2_PROXY_FOOTER: "SocialGouv"
       OAUTH2_PROXY_CUSTOM_SIGN_IN_LOGO: "https://socialgouv.github.io/support/img/marianne.jpeg"
-      #OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: true
-      # OAUTH2_PROXY_ALLOWED_ROLE: <realm role name> // Optional, required realm role
-      # OAUTH2_PROXY_ALLOWED_ROLE: <client id>:<client role name> // Optional, required client role
     ports:
       - 3000:4180
     depends_on:
@@ -74,5 +70,3 @@ services:
   front:
     image: pengbai/docker-supermario
     restart: always
-    # ports:
-    #   - 8084:8080
