@@ -1,4 +1,4 @@
-# oauth2-proxy + keycloak + DSFR
+# oauth2-proxy-keycloak-demo
 
 This docker-compose setup demonstrates how to protect some web service behind an [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) + [keycloak](https://www.keycloak.org/) authentification.
 
