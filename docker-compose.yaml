@@ -1,5 +1,3 @@
-version: "3.8"
-
 volumes:
   postgres_data:
     driver: local
@@ -7,7 +5,7 @@ volumes:
 services:
   postgres:
     # this DB will host the keycloak config
-    image: postgres:14
+    image: postgres:16
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -16,10 +14,12 @@ services:
       POSTGRES_PASSWORD: pgpassword
       POSTGRES_DB: keycloak
   keycloak:
-    image: quay.io/keycloak/keycloak:19.0.0
+    image: quay.io/keycloak/keycloak:25.0
     restart: always
     environment:
-      KC_DB_URL: "jdbc:postgresql://postgres:5432/keycloak"
+      KC_DB_URL_HOST: "postgres"
+      KC_DB_URL_DATABASE: "keycloak"
+      KC_DB_URL_PORT: "5432"
       KC_METRICS_ENABLED: "true"
       KC_DB_USERNAME: pgadmin
       KC_DB_PASSWORD: pgpassword
@@ -33,23 +33,16 @@ services:
     volumes:
       - ./keycloak/config:/opt/keycloak/data/import
       - ./keycloak/providers:/opt/keycloak/providers
-    command: "start --import-realm --db=postgres --http-enabled=true --http-port=8080 --hostname-strict=false --hostname-strict-https=false --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true "
-    healthcheck:
-      # wait for the openid config url to be available
-      test: curl --fail http://127.0.0.1:8080/realms/app-realm/.well-known/openid-configuration || exit 1
-      interval: 10s
-      retries: 50
-      start_period: 0s
-      timeout: 3s
+    command: "start --import-realm --http-enabled=true --http-port=8080 --hostname-strict=false --optimized"
   proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.4.0
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
     restart: always
     # see https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview
     environment:
       OAUTH2_PROXY_PROVIDER: keycloak-oidc
       OAUTH2_PROXY_CLIENT_ID: oauth2-proxy
       OAUTH2_PROXY_CLIENT_SECRET: "9htf4MohQEbbo64lcijfVvzw9Klgjfg5"
-      OAUTH2_PROXY_REDIRECT_URL: "http://127.0.0.1:3000/oauth2/callback"
+      OAUTH2_PROXY_REDIRECT_URL: "http://proxy:3000/oauth2/callback"
       OAUTH2_PROXY_OIDC_ISSUER_URL: "http://keycloak:8080/realms/app-realm"
       OAUTH2_PROXY_COOKIE_SECRET: 580b11331e148cacf8428190758c4fe2
       OAUTH2_PROXY_COOKIE_SECURE: false # for local env only
@@ -62,9 +55,6 @@ services:
       OAUTH2_PROXY_CUSTOM_SIGN_IN_LOGO: "https://socialgouv.github.io/support/img/marianne.jpeg"
     ports:
       - 3000:4180
-    depends_on:
-      keycloak:
-        condition: service_healthy
 
   # this service is not exposed directly bu behind oauth2-proxy
   front:
