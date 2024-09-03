@@ -6,7 +6,7 @@ This docker-compose setup demonstrates how to protect some web service behind an
 
 ## Local dev setup
 
-- Add `127.0.0.1   keycloak` to your `/etc/hosts`. this is necessary for the keycloak redirection
+- Add `127.0.0.1   keycloak` and `127.0.0.1   proxy` to your `/etc/hosts`. this is necessary for the keycloak redirection
 - Run `docker-compose up`
 - Login to keycloak at `http://keycloak:8080` as `admin/admin` and create a new user in the `app-realm` realm, and check its "verified email" status.
 - Now try to login with your new user via http://127.0.0.1:3000
